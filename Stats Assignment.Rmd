@@ -23,12 +23,11 @@ theme(axis.title.y = element_text(margin = margin(t = 0, r = 17, b = 0, l = 5)),
 ### Stock description, data collection and notation
 We start collectin data from the \texttt{tidyquant} stocks database. We'll be using Pinterest stock closing price from the IPO date (April 18, 2019) until the end of 2021 (December 31, 2021). Pinterest is an image sharing and social media service designed to enable saving and discovery of information on the internet using image. We define the IPO date as $t=1$ and the last day of 2021 as $T$. Hence, the stock closing price at $t=1$ will be denoted as $P_1$, the last closing price as $P_T$ and the generic day closing price as $P_t$.
 We download the data and pipe it to extrapolate only the \textt{close} column which we assign to vector \texttt{price}.
-<<<<<<< HEAD
 text text
 
-=======
+
 prova
->>>>>>> 39a105d084650d77ae5ce98d20ed6815f37a3064
+
 
 ```{r price}
 price <- tq_get("PINS", get = "stock.prices", from = "2019-04-18", to = "2021-12-31") %>% 
