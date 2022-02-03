@@ -21,9 +21,11 @@ theme(axis.title.y = element_text(margin = margin(t = 0, r = 17, b = 0, l = 5)),
 ```
 
 ### Stock description, data collection and notation
-We start collectin data from the \texttt{tidyquant} stocks database. We'll be using Pinterest stock closing price from the IPO date (April 18, 2019) until the end of 2021 (December 31, 2021). Pinterest is an image sharing and social media service designed to enable saving and discovery of information on the internet using image. We define the IPO date as $t=1$ and the last day of 2021 as $T$. Hence, the stock closing price at $t=1$ will be denoted as $P_1$, the last closing price as $P_T$ and the generic day closing price as $P_t$.
-We download the data and pipe it to extrapolate only the \textt{close} column which we assign to vector \texttt{price}.
-provaaa  2222
+We start collectin data from the \texttt{tidyquant} stocks database. We'll be using Pinterest stock closing price from the IPO date (April 18, 2019) until the end of 2021 (December 31, 2021). Pinterest is an image sharing and social media service designed to enable saving and discovery of information on the internet using image. 
+The statistical unit is the day, the variable is the price and the unit of measure of the price is dollar.
+We define the IPO date as $t=1$ and the last day of 2021 as $T$. Hence, the stock closing price at $t=1$ will be denoted as $P_1$, the last closing price as $P_T$ and the generic day closing price as $P_t$.
+We download the data and pipe it to extrapolate only the \texttt{close} column which we assign to vector \texttt{price}.
+
 
 
 ```{r price}
@@ -47,10 +49,11 @@ data.frame(Price=price, Time=1:NROW(price)) %>% ggplot(aes(Time, Price)) +
   theme
 ```
 
-
+From the plot we observe the evolution of the stock price within the above said interval. After the IPO, the stock prices moved in the interval between 25\$ and 35\$, before plunging from the 100th day circa. After day 200, the stock price showed a sign of recovery and then fell again reaching its minimum shortly after. From that point on, the stock prices showed a sharp and constant growth until the 400th day, from which it slowed down for a while and then start growing even faster reaching the maximum price at day 450 circa. The stock then showed a very high volatility, creating both positive and negative spike in an overall decreasing trend. 
+The average closing price of the stock is 40\$ circa and we can approximately say that the stock price have been lower than mean in the first half of the period and greater in the second half.
 
 ### Daily Log Return
-We use the following code to compute the daily log return $r_t$ (i.e. the log of the ratio between $P_t$ and $P_{t-1}$)
+We plot the data as a line having $t$ on the x axis and $r_t$ on y axis. 
 
 ```{r log return, echo=FALSE, out.width="80%"}
 log.rt <- diff(log(price))
@@ -67,6 +70,9 @@ data.frame(Log_Return=log.rt, Time=1:NROW(log.rt)) %>% ggplot(aes(Time, Log_Retu
 
 
 ```
+From the plot we can observe the Daily Log Return of the stock. Most of $r_t$ belong to the interval $[-0.1, 0.1]$. However, spikes can reach up to -0.2 and 0.3. We observe that the worst day (in terms of return) is at day 200 circa, around the same time in which the stock price reached its minimum. The stock showed the best return on the 320th day circa, hence contributing in the strong price growth from day 200 to day 400 circa. 
+The Log Return visualization offer a plot similar to the one we can obtain using simple return ($\frac{P_t - P_{t-1}}{P_{t-1}}$). However, Log Return and Simple Return show similar value only if the ratio of prices ($\frac{P_t}{P_{t-1}}$) belongs approximately to the interval $[0.95, 1.10]$. Given a ratio not belonging in the said interval, Log Return will produce a lower value than simple return if the ratio is positive and greater value (in absolute term) if the ratio is negative. 
+The Log Return visualization do not interfere with the sign of the simple return. Whenever $\frac{P_t}{P_{t-1}} < 1$ both simple and log return will show a negative value; vice versa for  $\frac{P_t}{P_{t-1}} > 1$.
 
 
 ### Mean
@@ -82,7 +88,16 @@ m.2 <- mean(log.rt.2)
 m.1
 m.2
 ```
-Comments on mean 
+Both means show small positive values. We can use \textit{Time Additivity} feature and the mean of Log Return to gain interesting insight on the overall return of the stock. \textit{Time Additivity} tells us that it is possible to compute the overall Log Return from $t$ to $t+k$ just by adding the daily Log Return from $t$ to $t+k$. The \texttt{m.1} gives us $\frac{\sum_{t=1}^{n_r-1} r_t}{n_r-1}$. Thus, we can compute the Log Return from $t=1$ to $T-1$ as follow:
+```{r showtotal return}
+m.1*NROW(log.rt.1)
+
+```
+Given what we said previously, this Log Return is not a good approximation of the Simple Return. Using the formula $R=e^{r}-1$ we can recover the Simple Return of Pinterest Stock from the IPO date until the end of 2021.
+```{r simplereturn}
+exp(m.1*NROW(log.rt.1))-1
+```
+
 
 ### Standard deviation
 ```{r sd, echo=FALSE}
