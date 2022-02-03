@@ -15,6 +15,7 @@ nocite: '@*'
 library(tidyverse)
 library(tidyquant)
 library(ggthemes)
+library(rmarkdown)
 theme <- theme_economist() + 
 theme(axis.title.y = element_text(margin = margin(t = 0, r = 17, b = 0, l = 5)), 
       axis.title.x =element_text(margin = margin(t = 17, r = , b = 5, l = 0)))
@@ -72,7 +73,7 @@ data.frame(Log_Return=log.rt, Time=1:NROW(log.rt)) %>% ggplot(aes(Time, Log_Retu
 ```
 
 From the plot we can observe the Daily Log Return of the stock. Most of $r_t$ belong to the interval $[-0.1, 0.1]$. However, spikes can reach up to -0.2 and 0.3. We observe that the worst day (in terms of return) is at day 200 circa, around the same time in which the stock price reached its minimum. The stock showed the best return on the 320th day circa, hence contributing in the strong price growth from day 200 to day 400 circa. 
-The Log Return visualization offer a plot similar to the one we can obtain using simple return ($\frac{P_t - P_{t-1}}{P_{t-1}}$). However, Log Return and Simple Return show similar value only if the ratio of prices ($\frac{P_t}{P_{t-1}}$) belongs approximately to the interval $[0.95, 1.10]$. Given a ratio not belonging in the said interval, Log Return will produce a lower value than simple return if the ratio is positive and greater value (in absolute term) if the ratio is negative. 
+The Log Return visualization offer a plot similar to the one we can obtain using simple return ($\frac{P_t - P_{t-1}}{P_{t-1}}$). However, Log Return and Simple Return show similar value only if the ratio of prices ($\frac{P_t}{P_{t-1}}$) belongs approximately to the interval $[0.95, 1.10]$ (Appendix A). Given a ratio not belonging in the said interval, Log Return will produce a lower value than simple return if the ratio is positive and greater value (in absolute term) if the ratio is negative. 
 The Log Return visualization do not interfere with the sign of the simple return. Whenever $\frac{P_t}{P_{t-1}} < 1$ both simple and log return will show a negative value; vice versa for  $\frac{P_t}{P_{t-1}} > 1$.
 
 
@@ -89,7 +90,7 @@ m.2 <- mean(log.rt.2)
 m.1
 m.2
 ```
-Both means show small positive values. We can use \textit{Time Additivity} feature and the mean of Log Return to gain interesting insight on the overall return of the stock. \textit{Time Additivity} tells us that it is possible to compute the overall Log Return from $t$ to $t+k$ just by adding the daily Log Return from $t$ to $t+k$. The \texttt{m.1} gives us $\frac{\sum_{t=1}^{n_r-1} r_t}{n_r-1}$. Thus, we can compute the Log Return from $t=1$ to $T-1$ as follow:
+Both means show small positive values. We can use \textit{Time Additivity} feature and the mean of Log Return to gain interesting insight on the overall return of the stock. \textit{Time Additivity} tells us that it is possible to compute the overall Log Returns from $t$ to $t+k$ just by adding the daily Log Return from $t$ to $t+k$. The \texttt{m.1} gives us $\frac{\sum_{t=1}^{n_r-1} r_t}{n_r-1}$. Thus, we can compute the Log Return from $t=1$ to $T-1$ as follow:
 ```{r showtotal return}
 m.1*NROW(log.rt.1)
 
@@ -111,26 +112,24 @@ s.1
 s.2
 
 ```
-Both Standard Deviations present small values. This means that the most of the Log Return are concentrated around the mean. We may refer to the Standard Deviation of daily return as Historical Daily Volatility. Daily Volatility present an interesting features to collect info about overall historical volatility. We do not discuss the math behind it because we do not have the knowledge to do so, but we'll use the following formula to compute $\sigma_{T-1}$.
-```{r showvolatility}
-s.1*sqrt(NROW(log.rt.1))
-
-```
-$\sigma_{T-1}$ represent the volatility of the stock in a $T-1$ time horizon. This measure intuitively assumes greater value than Daily volatility because we may expect from the stock price greater variability when time horizon is longer.
-
-We may apply the same reasoning on \texttt{m.2} to achieve a different measure of volatility of the stock in a $T-1$ time horizon.
+Both Standard Deviations present small similar values. This means that the most of the Log Return are concentrated around the mean. However, we need to take in consideration the nature of the data in order to draw useful insight from standard deviation. We showed previously that the most of Log Return belong to the interval $[-0.1, 0.1]$ and both \texttt{m.1} and \texttt{m.2} are very small values. Given this information, we can say that Standard Deviation (0.05 circa) is quite high relatively to the Mean. We may refer to the Standard Deviation of daily return as Historical Daily Volatility. We can conclude that Pinterest stock presents a relatively high daily volatility.
 
 
-### Correlation
+### Correlation coefficient
 
 ```{r corr, echo=FALSE}
-corr.log.rt <- cor(log.rt.1, log.rt.2)
+m.product <- mean(log.rt.1*log.rt.2)
+cov.log.rt <- m.product-m.1*m.2
+cor.log.rt <- cov.log.rt/(s.1*s.2)
+
 ```
 ```{r showcorr}
-corr.log.rt
+m.product
+cov.log.rt
+cor.log.rt
 ```
 
-The correlation coefficient shows a very weak negative linear dependence. A negative linear dependence means that given a log return $r_k$ at day $k$, then $r_{k+1}$ will tend to move the stock price in the opposite direction. However, the very low correlation coefficient (in absolute term) tells us that the daily log-return of day $k+1$ cannot be expressed as linear function of $r_t$. Hence the linear dependence is negligible and we cannot draw any conclusion about the relationship of two consecutive days Log Return.
+The correlation coefficient shows a very weak negative linear dependence. A negative linear dependence means that given a log return $r_k$ at day $k$, then $r_{k+1}$ will tend to move the stock price in the opposite direction. However, the very low correlation coefficient (in absolute term) tells us that the daily log-return of day $k+1$ cannot be expressed as linear function of $r_t$.Hence the linear dependence is negligible and we cannot draw any conclusion about the relationship of two consecutive days stock Log Return.
 
 ### Absolute value
 ```{r corr.a, echo=FALSE}
@@ -146,17 +145,37 @@ m.2.abs
 s.1.abs 
 s.2.abs 
 ```
-comments on means and sd
+The means of the absolute value of Log Return now present greater values. Trivially, this happens because there are no longer negative values in the computation. Consequently, we observe lower Standard Deviations. We can observe that taking the absolute value do not make any changes in the first moment ($\frac{\sum r_t^2}{n_r-1} = \frac{\sum |r_t|^2}{n_r-1}$) while the second moment gets greater as seen before, thus leading to a lower variance. Taking the square root, being it a monotonous function, do not interfere with the observation. 
+
 ```{r corrabs, echo=FALSE}
-corr.log.rt.abs <- cor(abs(log.rt.1), abs(log.rt.2))
+m.product.abs <- mean(abs(log.rt.1)*abs(log.rt.2))
+cov.log.rt.abs <- m.product.abs-m.1.abs*m.2.abs
+cor.log.rt.abs <- cov.log.rt.abs/(s.1.abs*s.2.abs)
 ```
 
 
 ```{r showcorrabs}
-corr.log.rt.abs
+m.product.abs
+cov.log.rt.abs
+cor.log.rt.abs
 ```
 
+The correlation coefficient is now positive and greater. Computing the correlation between the absolute value of two consecutive days Log Return allows us to focus only on the magnitude of the price variation, without taking into consideration the direction. A positive correlation coefficient may suggest a positive linear dependence between the magnitude of price changes in days $t$ and $t+1$. However, even if the correlation coefficient in this case in greater than the one seen before (in absolute terms) the correlation coefficient is too low to draw any relevant conclusion about the relationship of two consecutive days stock absolute magnitude Log Return.
 
 ## Source
-
 <div id="refs"></div>
+
+
+## Appendix A
+Let's denote $x = \frac{P_t}{P_{t-1}}$. We can observe from the plot that $\log(x)$ and $x-1$ have similar values $\forall x \in [0.95, 1.10]$.
+
+```{r cruve, echo=FALSE}
+eq1 <- function(x){log(x)}
+eq2 <- function(x){x-1}
+
+```
+```{r plotcurve, echo=FALSE, warning=FALSE, out.width="80%"}
+ggplot(data.frame(x=c(0.6, 1.4)), aes(x=x)) + 
+  stat_function(fun=eq1) + stat_function(fun=eq2, size=1.2, linetype = "dashed" ) + scale_y_continuous(limits = c(-0.5, 0.5)) + scale_x_continuous(breaks = seq(0.5, 1.5, 0.1)) + ylab(label = "Log / Simple Return") +theme
+
+```
