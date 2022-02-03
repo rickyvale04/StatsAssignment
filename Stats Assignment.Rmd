@@ -1,0 +1,139 @@
+---
+title: "Statistics Assignment"
+author: |
+  | Giampietro Ciancio 965991 
+  | Riccardo Valenti 979784        
+date: ""
+output: 
+  pdf_document
+bibliography: references.bib
+nocite: '@*'
+
+---
+
+```{r loadpackage, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(tidyquant)
+library(ggthemes)
+theme <- theme_economist() + 
+theme(axis.title.y = element_text(margin = margin(t = 0, r = 17, b = 0, l = 5)), 
+      axis.title.x =element_text(margin = margin(t = 17, r = , b = 5, l = 0)))
+```
+
+### Stock description, data collection and notation
+We start collectin data from the \texttt{tidyquant} stocks database. We'll be using Pinterest stock closing price from the IPO date (April 18, 2019) until the end of 2021 (December 31, 2021). Pinterest is an image sharing and social media service designed to enable saving and discovery of information on the internet using image. We define the IPO date as $t=1$ and the last day of 2021 as $T$. Hence, the stock closing price at $t=1$ will be denoted as $P_1$, the last closing price as $P_T$ and the generic day closing price as $P_t$.
+We download the data and pipe it to extrapolate only the \textt{close} column which we assign to vector \texttt{price}.
+
+
+```{r price}
+price <- tq_get("PINS", get = "stock.prices", from = "2019-04-18", to = "2021-12-31") %>% 
+  .$close
+head(price)
+```
+
+### Daily Closing Price
+We plot the data as a line having $t$ on the x axis and $P_t$ on y axis. 
+
+```{r plot, echo=FALSE, out.width="80%"}
+data.frame(Price=price, Time=1:NROW(price)) %>% ggplot(aes(Time, Price)) +
+  geom_line() + 
+  geom_point(aes(x= Time[which.max(Price)], y= max(Price)), color="#e3120b",
+             size= 1.5) +
+  geom_point(aes(x= Time[which.min(Price)], y= min(Price)), color="#e3120b",
+             size= 1.5) +
+  geom_hline(aes(yintercept=mean(Price)), linetype="dashed", color = "#e3120b") + 
+  labs(title = "PINS", subtitle = "Daily Closing Price")+
+  theme
+```
+
+
+
+### Daily Log Return
+We use the following code to compute the daily log return $r_t$ (i.e. the log of the ratio between $P_t$ and $P_{t-1}$)
+
+```{r log return, echo=FALSE, out.width="80%"}
+log.rt <- diff(log(price))
+data.frame(Log_Return=log.rt, Time=1:NROW(log.rt)) %>% ggplot(aes(Time, Log_Return))+ 
+  geom_line()+ 
+  geom_point(aes(x=Time[which.max(Log_Return)], y= max(Log_Return)), 
+             color="#e3120b", size= 1.5)+
+  geom_point(aes(x=Time[which.min(Log_Return)], y= min(Log_Return)), 
+             color="#e3120b", size= 1.5)+ 
+  geom_hline(aes(yintercept=mean(Log_Return)), linetype="dashed", color = "#e3120b")+
+  ylab("Log Return") +
+  labs(title = "PINS", subtitle = "Daily Log Return")+
+  theme
+
+
+```
+
+
+### Mean
+
+```{r mean, echo=FALSE}
+nr <- NROW(log.rt)
+log.rt.1 <- log.rt[-nr]
+m.1 <- mean(log.rt.1)
+log.rt.2 <- log.rt[-1]
+m.2 <- mean(log.rt.2)
+```
+```{r showmean}
+m.1
+m.2
+```
+Comments on mean 
+
+### Standard deviation
+```{r sd, echo=FALSE}
+s.1 <- sd(log.rt.1)
+s.2 <- sd(log.rt.2)
+
+```
+```{r showsd}
+s.1
+s.2
+
+```
+comments on sd
+
+### Correlation
+
+```{r corr, echo=FALSE}
+m.product <- mean(log.rt.1*log.rt.2)
+corr.log.rt <- (m.product-m.1*m.2)/(s.1*s.2)
+corr.log.rt <- cor(log.rt.1, log.rt.2)
+```
+```{r showcorr}
+corr.log.rt
+```
+
+The correlation coefficient shows a very weak negative linear dependence. A negative linear dependence means that given a log return $r_k$ at day $k$, then $r_{k+1}$ will tend to move the stock price in the opposite direction with a more or less constant magnitude. However, the very low correlation coefficient tells us that the daily log-return of day $k+1$ cannot be expressed as linear function of $r_t$. Hence the linear dependence is negligible and we cannot draw any conclusion about the relationship of two consecutive days log-return.
+
+### Absolute value
+```{r corr.a, echo=FALSE}
+m.1.abs <- mean(abs(log.rt.1))
+m.2.abs <- mean(abs(log.rt.2))
+s.1.abs <- sd(abs(log.rt.1))
+s.2.abs <- sd(abs(log.rt.2))
+
+```
+```{r meansdabs}
+m.1.abs 
+m.2.abs 
+s.1.abs 
+s.2.abs 
+```
+comments on means and sd
+```{r corrabs, echo=FALSE}
+corr.log.rt.abs <- cor(abs(log.rt.1), abs(log.rt.2))
+```
+
+
+```{r showcorrabs}
+corr.log.rt.abs
+```
+test test
+
+## Source
+
+<div id="refs"></div>
