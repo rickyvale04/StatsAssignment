@@ -70,6 +70,7 @@ data.frame(Log_Return=log.rt, Time=1:NROW(log.rt)) %>% ggplot(aes(Time, Log_Retu
 
 
 ```
+
 From the plot we can observe the Daily Log Return of the stock. Most of $r_t$ belong to the interval $[-0.1, 0.1]$. However, spikes can reach up to -0.2 and 0.3. We observe that the worst day (in terms of return) is at day 200 circa, around the same time in which the stock price reached its minimum. The stock showed the best return on the 320th day circa, hence contributing in the strong price growth from day 200 to day 400 circa. 
 The Log Return visualization offer a plot similar to the one we can obtain using simple return ($\frac{P_t - P_{t-1}}{P_{t-1}}$). However, Log Return and Simple Return show similar value only if the ratio of prices ($\frac{P_t}{P_{t-1}}$) belongs approximately to the interval $[0.95, 1.10]$. Given a ratio not belonging in the said interval, Log Return will produce a lower value than simple return if the ratio is positive and greater value (in absolute term) if the ratio is negative. 
 The Log Return visualization do not interfere with the sign of the simple return. Whenever $\frac{P_t}{P_{t-1}} < 1$ both simple and log return will show a negative value; vice versa for  $\frac{P_t}{P_{t-1}} > 1$.
@@ -97,7 +98,7 @@ Given what we said previously, this Log Return is not a good approximation of th
 ```{r simplereturn}
 exp(m.1*NROW(log.rt.1))-1
 ```
-
+The same reasoning can be applied to \texttt{m.2} in order to recover the Log Return and Simple Return from $t=2$ to $T$.
 
 ### Standard deviation
 ```{r sd, echo=FALSE}
@@ -110,20 +111,26 @@ s.1
 s.2
 
 ```
-comments on sd
+Both Standard Deviations present small values. This means that the most of the Log Return are concentrated around the mean. We may refer to the Standard Deviation of daily return as Historical Daily Volatility. Daily Volatility present an interesting features to collect info about overall historical volatility. We do not discuss the math behind it because we do not have the knowledge to do so, but we'll use the following formula to compute $\sigma_{T-1}$.
+```{r showvolatility}
+s.1*sqrt(NROW(log.rt.1))
+
+```
+$\sigma_{T-1}$ represent the volatility of the stock in a $T-1$ time horizon. This measure intuitively assumes greater value than Daily volatility because we may expect from the stock price greater variability when time horizon is longer.
+
+We may apply the same reasoning on \texttt{m.2} to achieve a different measure of volatility of the stock in a $T-1$ time horizon.
+
 
 ### Correlation
 
 ```{r corr, echo=FALSE}
-m.product <- mean(log.rt.1*log.rt.2)
-corr.log.rt <- (m.product-m.1*m.2)/(s.1*s.2)
 corr.log.rt <- cor(log.rt.1, log.rt.2)
 ```
 ```{r showcorr}
 corr.log.rt
 ```
 
-The correlation coefficient shows a very weak negative linear dependence. A negative linear dependence means that given a log return $r_k$ at day $k$, then $r_{k+1}$ will tend to move the stock price in the opposite direction with a more or less constant magnitude. However, the very low correlation coefficient tells us that the daily log-return of day $k+1$ cannot be expressed as linear function of $r_t$. Hence the linear dependence is negligible and we cannot draw any conclusion about the relationship of two consecutive days log-return.
+The correlation coefficient shows a very weak negative linear dependence. A negative linear dependence means that given a log return $r_k$ at day $k$, then $r_{k+1}$ will tend to move the stock price in the opposite direction. However, the very low correlation coefficient (in absolute term) tells us that the daily log-return of day $k+1$ cannot be expressed as linear function of $r_t$. Hence the linear dependence is negligible and we cannot draw any conclusion about the relationship of two consecutive days Log Return.
 
 ### Absolute value
 ```{r corr.a, echo=FALSE}
