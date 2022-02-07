@@ -161,6 +161,7 @@ cor.log.rt.abs
 ```
 
 The correlation coefficient is now positive and greater. Computing the correlation between the absolute value of two consecutive days Log Return allows us to focus only on the magnitude of the price variation, without taking into consideration the direction. A positive correlation coefficient may suggest a positive linear dependence between the magnitude of price changes in days $t$ and $t+1$. However, even if the correlation coefficient in this case in greater than the one seen before (in absolute terms) the correlation coefficient is too low to draw any relevant conclusion about the relationship of two consecutive days stock absolute magnitude Log Return.
+We know that Correlation Coefficient is not sensible to linear transformation. The absolute value, being a non-linear transformation, leads to different Correlation Coefficient.
 
 ## Source
 <div id="refs"></div>
