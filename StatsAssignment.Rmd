@@ -10,7 +10,7 @@ bibliography: references.bib
 nocite: '@*'
 
 ---
-
+ciao
 ```{r loadpackage, message=FALSE, warning=FALSE, echo=FALSE}
 library(tidyverse)
 library(tidyquant)
